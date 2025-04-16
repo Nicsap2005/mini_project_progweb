@@ -170,6 +170,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     <footer>
     2025 Portal Lowongan Kerja | Dibuat dengan sepenuh hati😍
     </footer>
-    
+    <!-- -->
 </body>
     </html>
