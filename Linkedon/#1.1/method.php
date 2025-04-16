@@ -120,4 +120,40 @@ function openDB($servername,$username,$password,$dbname){
     return $conn;
 }
 
+function closeDB($conn){
+    $conn->close();
+}
+
+function mainPage($nama,$job,$lokasi,$tipe,$gaji){
+    $query = "SELECT * FROM loker WHERE ";
+    $input = [$nama,$job,$lokasi,$tipe,$gaji];
+    $cell = ["_namaPerusahaan","_job","_alamat","_tipe","_gaji"];
+    $temp = [];
+    $counter = 0;
+    for ($i = 0; $i < count($input); $i++) {
+        if ($input[$i] != ""){
+            if ($cell[$i] == "_gaji"){
+                $arrGaji = explode("-",$gaji);
+                $cellQuery = $cell[$i]."    = ".$arrGaji[0]." < ".$cell[$i]." AND ".$arrGaji[1]." > ".$cell[$i];
+            }
+            else{
+                $cellQuery = $cell[$i]." = ".'"'.$input[$i].'"';
+            }
+            array_push($temp, $cellQuery);
+            $counter += 1;
+        }
+    }
+    $joinedString = implode(' AND ', $temp);
+    $query .= $joinedString;
+    echo $query;
+
+    if ($counter > 0) {
+        return $query;
+    }else{
+        return 'SELECT * FROM loker';
+    }
+    }
+
+
+
 ?>

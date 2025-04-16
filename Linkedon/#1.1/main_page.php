@@ -11,6 +11,7 @@ $row = $result->fetch_assoc();
 $usertype = $row["_user_type"];
 $curusertype = "current_".$row["_user_type"];
 
+$mainPageResult = $conn->query("SELECT *,FORMAT(_gaji, 0, 'de_DE') AS gaji FROM loker");
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
     if (isset($_POST["form_type"])) {
         if ($_POST["form_type"] == "deleteAccount"){
@@ -27,6 +28,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
         list($namaPerusahaan, $job) = explode("|", $_POST["detailLowongan"]);
         $conn->query("INSERT INTO detaillowongan values('$namaPerusahaan','$job',false)");
         header("location: detail.php");
+    }
+    if (isset($_POST["Search"])) {
+        $Nama =  $_POST["Nama"];
+        $Kategori =  $_POST["Job"];
+        $Lokasi =  $_POST["Lokasi"];
+        $Tipe =  $_POST["Tipe"];
+        $Gaji =  $_POST["Gaji"];
+        $query = mainPage($Nama,$Kategori,$Lokasi,$Tipe,$Gaji);
+        $mainPageResult = $conn->query($query);
+        
     }
     if (isset($_POST["buatLowongan"])) {
         header("location: pengajuanPage.php");
@@ -89,25 +100,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
         <h2>Temukan Pekerjaan Impianmu!!</h2>
         <h4>Mulai Karirmu Sekarang</h4>
     </div>
+    
+
+
+
     <div class="search-box">
-        <input type="text" placeholder="Cari nama perusahaan...">
-        <button>Cari</button>
+        <form action="" method="post">
+            <input type="hidden" name="Search" value="">
+            <input style="width: 20%;" name="Nama" type="text" placeholder="Nama Perusahaan"> 
+            <select name = "Job">
+                <option value="">Job</option>
+                <?php 
+                    $option = $conn->query("SELECT DISTINCT _job FROM loker");
+                    while ($row = $option->fetch_assoc()) {
+                        echo "<option value = \"{$row['_job']}\">{$row['_job']}</option>";
+                    }
+                ?>
+            </select>
+            <select name = "Lokasi">
+                <option value="">Semua Lokasi</option>
+                <?php
+                $option = $conn->query("SELECT DISTINCT _alamat FROM loker");
+                while ($row = $option->fetch_assoc()) {
+                    echo "<option value =\"{$row['_alamat']}\">{$row['_alamat']}</option>";
+                } 
+                ?>
+            </select>
+            <select name = "Tipe">
+                <option value="">Semua Jenis</option>
+                <?php
+                $option = $conn->query("SELECT DISTINCT _tipe FROM loker");
+                while ($row = $option->fetch_assoc()) {
+                    echo "<option value=\"{$row['_tipe']}\">{$row['_tipe']}</option>";
+                } 
+                ?>
+            </select>
+            <input style="width: 20%;" name = "Gaji" type="text" placeholder="gaji: 100000000-30000000">
+            <button type="submit"><img width="15px" src="../decoration/search.png  " alt=""></button>
+        </form>
     </div>
 
         
         <?php
-        $result = $conn->query("SELECT *,FORMAT(_gaji, 0, 'de_DE') AS gaji FROM loker");
-        if ($result->num_rows > 0) {
+       
+        if ($mainPageResult->num_rows > 0) {
             $counter = 0;
             echo "<div class='job-container'>";
-            while ($row = $result->fetch_assoc()) {
+            while ($row = $mainPageResult->fetch_assoc()) {
                 $pict = $row['_pictpath'];
                 echo"<div class='job-item'>
                             <td><img src='$pict' alt='' width = 150px></td>
                             <h2><b>{$row['_job']}</b></h2>
                             <p>Perusahaan: {$row['_namaPerusahaan']}</p>
                             <p>Jenis: {$row['_tipe']}</p>
-                            <p>Gaji: Rp {$row['gaji']}/{$row['_gajiPer']}</p>
+                            <p>Gaji: Rp {$row['_gaji']}/{$row['_gajiPer']}</p>
                             <form action='' method='post'> 
                                 <input type='hidden' name='detailLowongan' value='" . htmlspecialchars($row["_namaPerusahaan"] . "|" . $row["_job"], ENT_QUOTES, 'UTF-8') . "'>
                                 <button type='submit' class='btn'>Lihat Detail</button>
@@ -124,5 +170,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     <footer>
     2025 Portal Lowongan Kerja | Dibuat dengan sepenuh hati😍
     </footer>
+    
 </body>
     </html>
